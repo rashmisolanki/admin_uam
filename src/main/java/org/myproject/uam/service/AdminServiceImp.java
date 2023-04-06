@@ -1,10 +1,9 @@
 package org.myproject.uam.service;
 
-import net.bytebuddy.agent.builder.AgentBuilder;
 import org.myproject.uam.comman.Constant;
 import org.myproject.uam.dto.Request;
 import org.myproject.uam.dto.Response;
-import org.myproject.uam.entity.Admin;
+import org.myproject.uam.entity.User;
 import org.myproject.uam.exception.EffectiveStartDateException;
 import org.myproject.uam.exception.NoRequestFoundException;
 import org.myproject.uam.exception.PfNumberNotFound;
@@ -14,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,7 +24,7 @@ public class AdminServiceImp implements AdminService {
 
     public Response createNewUser(Request request)
     {
-        Admin adminEntity=new Admin();
+        User adminEntity=new User();
           adminEntity.setName(request.getName());
           adminEntity.setEmailId(request.getEmailId());
           adminEntity.setEffectivedate(request.getEffectiveDate());
@@ -37,12 +35,12 @@ public class AdminServiceImp implements AdminService {
           adminEntity.setUsergroupId(request.getUserGroupId());
           adminEntity.setPendingStatus(Constant.PENDING_STATUS_APPROVAL);
           adminEntity.setStatus(Constant.NEW_STATUS);
-        Optional<Admin> adminOptionalEntity=  adminRepository.findByPfNumber(request.getPfNumber());
+        Optional<User> adminOptionalEntity=  adminRepository.findByPfNumber(request.getPfNumber());
         if(adminOptionalEntity.isPresent())
         {
             throw new UserAlreadyPresentException("User Not Present");
         }
-        Admin saveEntity = adminRepository.save(adminEntity);
+        User saveEntity = adminRepository.save(adminEntity);
           Response response = new Response();
           response.setRequestId(saveEntity.getRequestId());
           response.setName(saveEntity.getName());
@@ -59,9 +57,9 @@ public class AdminServiceImp implements AdminService {
     }
 
     public Response approvalRequest(Long requestId)  {
-        Optional<Admin> adminEntity=adminRepository.findById(requestId);
+        Optional<User> adminEntity=adminRepository.findById(requestId);
         adminEntity.orElseThrow(()->new PfNumberNotFound("pf number is not present") );
-       Admin getAdminEntity= adminEntity.get();
+       User getAdminEntity= adminEntity.get();
        LocalDate currentDateTime= LocalDate.now();
        LocalDate startDateTime=getAdminEntity.getEffectivedate();
           if(startDateTime.isEqual(currentDateTime))
@@ -92,12 +90,12 @@ public class AdminServiceImp implements AdminService {
 
     public List<Response> viewAllUser()
     {
-      List<Admin> adminList= adminRepository.findAll();
+      List<User> adminList= adminRepository.findAll();
        List<Response>responseList= adminList.stream().map(user->returnResponse(user)).collect(Collectors.toList());
        return responseList;
     }
 
-    public Response returnResponse(Admin admin )
+    public Response returnResponse(User admin )
     {
         Response response=new Response();
         response.setName(admin.getName());
@@ -116,9 +114,9 @@ public class AdminServiceImp implements AdminService {
 
     public Response viewUser(Long requestId)
     {
-        Optional<Admin> adminView=adminRepository.findById(requestId);
+        Optional<User> adminView=adminRepository.findById(requestId);
         adminView.orElseThrow(()->new NoRequestFoundException("no Request raised for User"));
-       Admin adminEntityView=adminView.get();
+       User adminEntityView=adminView.get();
        Response response=new Response();
        response.setName(adminEntityView.getName());
        response.setEmailId(adminEntityView.getEmailId());
@@ -136,9 +134,9 @@ public class AdminServiceImp implements AdminService {
 
     public Response editUser(Request request,Long requestId)
     {
-       Optional<Admin> adminOptional= adminRepository.findById(requestId);
+       Optional<User> adminOptional= adminRepository.findById(requestId);
        adminOptional.orElseThrow(()->new NoRequestFoundException("no request found"));
-       Admin admin=adminOptional.get();
+       User admin=adminOptional.get();
        LocalDate currentDate=LocalDate.now();
        LocalDate startDate= request.getEffectiveDate();
        if(startDate.isBefore(currentDate))
@@ -169,9 +167,9 @@ public class AdminServiceImp implements AdminService {
     }
     public Response rejectUser(Long requestId)
     {
-       Optional<Admin> adminOptional= adminRepository.findById(requestId);
+       Optional<User> adminOptional= adminRepository.findById(requestId);
        adminOptional.orElseThrow(()->new NoRequestFoundException("request not found"));
-       Admin admin=adminOptional.get();
+       User admin=adminOptional.get();
        admin.setStatus(Constant.INACTIVE_STATUS);
        admin.setPendingStatus(Constant.PENDING_STATUS);
        adminRepository.save(admin);
@@ -193,9 +191,9 @@ public class AdminServiceImp implements AdminService {
 
     public Response rejectEditUser(Long requestId)
     {
-        Optional<Admin> adminOptional=adminRepository.findById(requestId);
+        Optional<User> adminOptional=adminRepository.findById(requestId);
         adminOptional.orElseThrow(()->new NoRequestFoundException("no request found"));
-        Admin admin= adminOptional.get();
+        User admin= adminOptional.get();
         
         admin.setStatus(Constant.INACTIVE_STATUS);
         admin.setPendingStatus(Constant.PENDING_STATUS);
@@ -218,9 +216,9 @@ public class AdminServiceImp implements AdminService {
     }
     public Response approveEditUser(Long requestId)
     {
-      Optional<Admin> adminOptional=adminRepository.findById(requestId);
+      Optional<User> adminOptional=adminRepository.findById(requestId);
       adminOptional.orElseThrow(()->new NoRequestFoundException("no request found"));
-      Admin admin= adminOptional.get();
+      User admin= adminOptional.get();
       if(admin.getStatus().equals("Active") && admin.getPendingStatus().equals("Pending Approval(Edit)"));
         {
             admin.setStatus(Constant.PENDING_STATUS);
@@ -241,6 +239,37 @@ public class AdminServiceImp implements AdminService {
         response.setRequestId(admin.getRequestId());
         response.setReason(admin.getReason());
         return response;
+    }
+
+    public Response deactivateUser(Request request,Long requestId)
+    {
+        Optional<User> adminOptional= adminRepository.findById(requestId);
+        adminOptional.orElseThrow(()->new NoRequestFoundException("no request found"));
+        User admin=adminOptional.get();
+        LocalDate currentDate=LocalDate.now();
+        LocalDate startDate= request.getEffectiveDate();
+        if(startDate.isBefore(currentDate))
+        {
+            throw new EffectiveStartDateException("effective start date is not before today's date");
+        }
+
+        admin.setEffectivedate(request.getEffectiveDate());
+        admin.setPendingStatus(Constant.PENDING_STATUS_DEACTIVATE);
+        adminRepository.save(admin);
+        Response response=new Response();
+        response.setName(admin.getName());
+        response.setEmailId(admin.getEmailId());
+        response.setPfNumber(admin.getPfNumber());
+        response.setUserGroup(admin.getUsergroup());
+        response.setUserGroupId(admin.getUsergroupId());
+        response.setLevel(admin.getLevel());
+        response.setStatus(admin.getStatus());
+        response.setPendingStatus(admin.getPendingStatus());
+        response.setEffectiveDate(admin.getEffectivedate());
+        response.setRequestId(admin.getRequestId());
+        response.setReason(admin.getReason());
+        return response;
+
     }
 
 }

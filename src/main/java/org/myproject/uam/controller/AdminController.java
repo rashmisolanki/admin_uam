@@ -58,6 +58,12 @@ public class AdminController {
      @GetMapping("/edit/reject/{requestId}")
       public Response rejectEditUser(@PathVariable Long requestId)
      {
+         return adminService.rejectEditUser(requestId);
+     }
 
+     @GetMapping("/deactivate/{requestId}")
+     public Response deactivateUser(@RequestBody Request request,@PathVariable Long requestId)
+     {
+          return adminService.deactivateUser(request,requestId);
      }
 }

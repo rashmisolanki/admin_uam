@@ -1,14 +1,13 @@
 package org.myproject.uam.entity;
 
 import lombok.Data;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
+
 import javax.persistence.*;
 import java.time.LocalDate;
 @Entity
 @Table
 @Data
-public class Admin {
+public class User {
 
     @Id
     @Column
@@ -17,6 +16,10 @@ public class Admin {
      private Long requestId;
     @Column
     private String pfNumber;
+    @Column
+    private int isDeleted;
+    @Column
+    private int ofId;
     @Column
     private String name;
     @Column

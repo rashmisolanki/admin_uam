@@ -13,4 +13,6 @@ public class Constant {
 
     public static final String REJECT_STATUS="effective start is not correct";
 
+    public static final String PENDING_STATUS_DEACTIVATE="Pending Approval(deactivate)";
+
 }

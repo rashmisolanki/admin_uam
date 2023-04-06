@@ -18,4 +18,8 @@ public interface AdminService {
     public Response editUser(Request request,Long requestId);
 
     public Response approveEditUser(Long requestId);
+
+    public Response rejectEditUser(Long requestId);
+
+    public Response deactivateUser(Request request,Long requestId);
 }
