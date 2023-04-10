@@ -2,17 +2,17 @@ package org.myproject.uam.controller;
 
 import org.myproject.uam.dto.Request;
 import org.myproject.uam.dto.Response;
-import org.myproject.uam.service.AdminService;
+import org.myproject.uam.service.UamUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-public class AdminController {
+public class UamUserController {
 
     @Autowired
-    public AdminService adminService;
+    public UamUserService adminService;
 
     @PostMapping("/add/user")
     public Response createNewUser(@RequestBody Request request)
