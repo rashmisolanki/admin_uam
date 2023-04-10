@@ -5,7 +5,7 @@ import org.myproject.uam.dto.Response;
 
 import java.util.List;
 
-public interface AdminService {
+public interface UamUserService {
     public Response createNewUser(Request request);
     public Response approvalRequest(Long requestId);
 
