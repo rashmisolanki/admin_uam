@@ -12,58 +12,58 @@ import java.util.List;
 public class UamUserController {
 
     @Autowired
-    public UamUserService adminService;
+    public UamUserService uamUserService;
 
     @PostMapping("/add/user")
     public Response createNewUser(@RequestBody Request request)
     {
-        return adminService.createNewUser(request);
+        return uamUserService.createNewUser(request);
     }
 
     @GetMapping("/approve/{requestId}")
     public Response approvalRequest(@PathVariable Long requestId )
         {
-           return adminService.approvalRequest(requestId);
+           return uamUserService.approvalRequest(requestId);
         }
 
     @GetMapping("/view/allUser")
     public List<Response> viewAllUser()
     {
-       return adminService.viewAllUser();
+       return uamUserService.viewAllUser();
     }
 
     @GetMapping("/view/user/{requestId}")
     public Response viewUser(@PathVariable Long requestId)
     {
-       return adminService.viewUser(requestId);
+       return uamUserService.viewUser(requestId);
     }
 
     @GetMapping("/reject/{requestId}")
     public Response rejectUser(@PathVariable Long requestId)
     {
-      return adminService.rejectUser(requestId);
+      return uamUserService.rejectAddUser(requestId);
     }
 
     @PutMapping("/edit/user/{requestId}")
         public Response editUser(@RequestBody Request request ,@PathVariable Long requestId)
         {
-           return adminService.editUser(request,requestId);
+           return uamUserService.editUser(request,requestId);
         }
 
      @GetMapping("/edit/approve/{requestId}")
     public Response approveEditUser(@PathVariable Long requestId)
      {
-         return adminService.approveEditUser(requestId);
+         return uamUserService.approveEditUser(requestId);
      }
      @GetMapping("/edit/reject/{requestId}")
       public Response rejectEditUser(@PathVariable Long requestId)
      {
-         return adminService.rejectEditUser(requestId);
+         return uamUserService.rejectEditUser(requestId);
      }
 
      @GetMapping("/deactivate/{requestId}")
      public Response deactivateUser(@RequestBody Request request,@PathVariable Long requestId)
      {
-          return adminService.deactivateUser(request,requestId);
+          return uamUserService.deactivateUser(request,requestId);
      }
 }

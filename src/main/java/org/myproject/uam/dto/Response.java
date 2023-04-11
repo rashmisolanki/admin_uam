@@ -9,9 +9,7 @@ public class Response {
     private String pfNumber;
     private String name;
     private String emailId;
-    private String userGroup;
     private LocalDate effectiveDate;
-    private String level;
     private String reason;
     private String pendingFor;
     private String Status;
