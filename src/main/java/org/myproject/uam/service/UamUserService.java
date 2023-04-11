@@ -13,7 +13,7 @@ public interface UamUserService {
 
     public Response viewUser(Long requestId);
 
-    public Response rejectUser(Long requestId);
+    public Response rejectAddUser(Long requestId);
 
     public Response editUser(Request request,Long requestId);
 

@@ -17,6 +17,7 @@ public class UamUser {
     private Long userId;
     @Column
     private String pfNumber;
+    @Column
     private String name;
     @Column
     private String status;
@@ -33,13 +34,7 @@ public class UamUser {
     @Column
     private String emailId;
     @Column
-    private String userGroup;
-    @Column
     private LocalDate effectiveDate;
-    @Column
-    private String userGroupId;
-    @Column
-    private  String level;
     @Column
     private String reason;
     @Column
