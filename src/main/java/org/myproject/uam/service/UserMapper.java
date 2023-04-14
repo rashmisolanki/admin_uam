@@ -105,19 +105,25 @@ public class UserMapper {
 
     public Response prepareViewAllResponse(UamUser uamUser) {
         Response response = new Response();
+        response.setUserId(uamUser.getUserId());
         response.setName(uamUser.getName());
         response.setEmailId(uamUser.getEmailId());
         response.setPfNumber(uamUser.getPfNumber());
         response.setStatus(uamUser.getStatus());
         response.setPendingFor(uamUser.getPendingFor());
         response.setEffectiveDate(uamUser.getEffectiveDate());
-        response.setUserId(uamUser.getUserId());
         response.setReason(uamUser.getReason());
+        response.setCreationDate(uamUser.getCreationDate());
+        response.setModifiedDate(uamUser.getModifiedDate());
+        response.setCreatedBy(uamUser.getCreatedBy());
+        response.setModifiedBy(uamUser.getModifiedBy());
+        response.setGroupID(uamUser.getStagingUam().getGroupId());
         return response;
     }
 
     public Response prepareViewUserResponse(UamUser uamUser) {
         Response response = new Response();
+        response.setUserId(response.getUserId());
         response.setName(uamUser.getName());
         response.setEmailId(uamUser.getEmailId());
         response.setPfNumber(uamUser.getPfNumber());
@@ -126,6 +132,11 @@ public class UserMapper {
         response.setStatus(uamUser.getStatus());
         response.setPendingFor(uamUser.getPendingFor());
         response.setReason(uamUser.getReason());
+        response.setCreationDate(uamUser.getCreationDate());
+        response.setModifiedDate(uamUser.getModifiedDate());
+        response.setCreatedBy(uamUser.getCreatedBy());
+        response.setModifiedBy(uamUser.getModifiedBy());
+        response.setGroupID(uamUser.getStagingUam().getGroupId());
         return response;
     }
 
@@ -156,14 +167,15 @@ public class UserMapper {
         return response;
     }
 
-    public UamUser populateEditUser(Request request, UamUser dbUamUser)
+    public UamUser populateEditUser(Request request, UamUser dbUamUser, UamUserGroupId dbUamUserGroupId)
     {
         if (request.getEffectiveDate().isBefore(LocalDate.now())) {
             throw new EffectiveStartDateException("effective start date is not before today's date");
         }
-//        if (dbUamUser.getStatus().equals("Active") && dbUamUser.getUserGroup().equals(request.getUserGroup())) {
-//            throw new NoRequestFoundException("There is no change to User Group Id.");
-//        }
+       String abbreviatedGroup= Constant.userGroupAbbreviation.get(request.getUserGroup());
+        if (dbUamUser.getStatus().equals("active") && abbreviatedGroup.equals(dbUamUserGroupId.getGroupId())) {
+            throw new NoRequestFoundException("There is no change to User Group Id.");
+        }
         UamUser uamUser=new UamUser();
         uamUser.setName(dbUamUser.getName());
         uamUser.setPfNumber(dbUamUser.getPfNumber());
@@ -178,7 +190,7 @@ public class UserMapper {
         uamUser.setPendingFor(Constant.PENDING_APPROVAL_EDIT);
         StagingUam stagingUam=new StagingUam();
         stagingUam.setActionOnApproval(Constant.EDIT);
-        stagingUam.setGroupId(Constant.userGroupAbbreviation.get(request.getUserGroup()));
+        stagingUam.setGroupId(abbreviatedGroup);
         stagingUam.setStatus(Constant.NEW);
         stagingUam.setUamUser(uamUser);
         uamUser.setStagingUam(stagingUam);
@@ -197,6 +209,61 @@ public class UserMapper {
         response.setEffectiveDate(uamUser.getEffectiveDate());
         response.setUserId(uamUser.getUserId());
         response.setReason(uamUser.getReason());
+        return response;
+    }
+
+    public UamUser populateApproveEditUser(UamUser dbuamUser)
+    {
+        StagingUam stagingUam= dbuamUser.getStagingUam();
+        if(dbuamUser.getEffectiveDate().isEqual(LocalDate.now())) {
+                dbuamUser.setPendingFor(Constant.DASH);
+                dbuamUser.setStatus(Constant.ACTIVE);
+            }
+        else if (dbuamUser.getEffectiveDate().isAfter(LocalDate.now())) {
+                dbuamUser.setStatus(Constant.INACTIVE);
+                dbuamUser.setPendingFor(Constant.ADD_FUTURE);
+            }
+
+        stagingUam.setStatus(Constant.APPROVAL);
+        return dbuamUser;
+    }
+
+    public Response prepareResponseEditApproveUser(UamUser uamUser)
+    {
+        Response response = new Response();
+        response.setUserId(uamUser.getUserId());
+        response.setName(uamUser.getName());
+        response.setEmailId(uamUser.getEmailId());
+        response.setPfNumber(uamUser.getPfNumber());
+        response.setStatus(uamUser.getStatus());
+        response.setPendingFor(uamUser.getPendingFor());
+        response.setEffectiveDate(uamUser.getEffectiveDate());
+        response.setReason(uamUser.getReason());
+        return response;
+    }
+
+    public UamUser prepareEditRejectUser(UamUser dbUamUser)
+    {
+       StagingUam stagingUam= dbUamUser.getStagingUam();
+        dbUamUser.setStatus(Constant.INACTIVE);
+        dbUamUser.setPendingFor(Constant.DASH);
+        stagingUam.setStatus(Constant.REJECT);
+        return dbUamUser;
+    }
+
+    public Response prepareResponseEditRejectUser(UamUser uamUser)
+    {
+        Response response = new Response();
+        response.setUserId(uamUser.getUserId());
+        response.setName(uamUser.getName());
+        response.setEmailId(uamUser.getEmailId());
+        response.setPfNumber(uamUser.getPfNumber());
+        response.setStatus(uamUser.getStatus());
+        response.setPendingFor(uamUser.getPendingFor());
+        response.setEffectiveDate(uamUser.getEffectiveDate());
+        response.setGroupID(uamUser.getStagingUam().getGroupId());
+        response.setReason(uamUser.getReason());
+        response.setRejectReason(Constant.REJECT);
         return response;
     }
 }
