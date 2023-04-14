@@ -3,7 +3,6 @@ package org.myproject.uam.service;
 import org.myproject.uam.comman.Constant;
 import org.myproject.uam.dto.Request;
 import org.myproject.uam.dto.Response;
-import org.myproject.uam.entity.StagingUam;
 import org.myproject.uam.entity.UamUser;
 import org.myproject.uam.entity.UamUserGroupId;
 import org.myproject.uam.exception.EffectiveStartDateException;
@@ -47,8 +46,8 @@ public class UamUserServiceImp implements UamUserService {
         return userMapper.prepareResponse(saveUamUser);
     }
 
-    public Response approvalRequest(Long UserId) {
-        Optional<UamUser> uamUser = uamUserRepository.findById(UserId);
+    public Response approvalRequest(Long userId) {
+        Optional<UamUser> uamUser = uamUserRepository.findById(userId);
         uamUser.orElseThrow(() -> new PfNumberNotFound("pf number is not present"));
         UamUser updatedUamUser=userMapper.populateApprovalAddUser(uamUser.get());
         UamUser savedUamUser=uamUserRepository.save(updatedUamUser);
@@ -57,89 +56,61 @@ public class UamUserServiceImp implements UamUserService {
         return userMapper.prepareApprovalResponse(savedUamUser);
     }
 
-    public Response rejectAddUser(Long requestId) {
+    public Response rejectAddUser(Long userId) {
 
-        Optional<UamUser> findAllUamUser = uamUserRepository.findById(requestId);
+        Optional<UamUser> findAllUamUser = uamUserRepository.findById(userId);
         findAllUamUser.orElseThrow(() -> new NoRequestFoundException("request not found"));
         UamUser uamUser=userMapper.populateRejectAddUser(findAllUamUser.get());
         uamUserRepository.save(uamUser);
         return userMapper.prepareResponseRejectAddUser(uamUser);
     }
 
-    public List<Response> viewAllUser() {
-        List<UamUser> adminList = uamUserRepository.findAll();
-        List<Response> responseList = adminList.stream()
-                .map(user -> userMapper.prepareViewAllResponse(user)).collect(Collectors.toList());
-        return responseList;
+    public Response editUser(Request request, Long userId) {
+        Optional<UamUser> dbUamUser = uamUserRepository.findById(userId);
+        dbUamUser.orElseThrow(() -> new NoRequestFoundException("no request found"));
+       Optional<UamUserGroupId> dbUamUserGroup= uamUserGroupIdRepository.findById(dbUamUser.get().getPfNumber());
+        UamUser uamUser=userMapper.populateEditUser(request,dbUamUser.get(),dbUamUserGroup.get());
+        uamUser.setOfId(userId);
+        UamUser saveUamUser=uamUserRepository.save(uamUser);
+       return userMapper.prepareResponseEditUser(saveUamUser);
     }
 
+    public Response approveEditUser(Long userId) {
+        Optional<UamUser> uamUser = uamUserRepository.findById(userId);
+        uamUser.orElseThrow(() -> new NoRequestFoundException("no request found"));
+        UamUser uamUserApprove=userMapper.populateApproveEditUser(uamUser.get());
+        UamUser savedUamUser=uamUserRepository.save(uamUserApprove);
+        if(savedUamUser.getEffectiveDate().equals(LocalDate.now())) {
+            UamUserGroupId userGroupId = userMapper.populateUamUserGroupId(savedUamUser);
+            uamUserGroupIdRepository.save(userGroupId);
+        }
+        return userMapper.prepareResponseEditApproveUser(savedUamUser);
+    }
 
-    public Response viewUser(Long requestId) {
-        Optional<UamUser> uamUser = uamUserRepository.findById(requestId);
+    public Response rejectEditUser(Long userId) {
+        Optional<UamUser> dbUamUser = uamUserRepository.findById(userId);
+        dbUamUser.orElseThrow(() -> new NoRequestFoundException("no request found"));
+        UamUser uamUser=userMapper.prepareEditRejectUser(dbUamUser.get());
+        uamUserRepository.save(uamUser);
+        return userMapper.prepareResponseEditRejectUser(uamUser);
+
+    }
+
+    public List<Response> viewAllUser() {
+        List<UamUser> uamUserList=uamUserRepository.findAllUserByIsDeleted();
+        List<Response> responseList = uamUserList.stream()
+                .map(user -> userMapper.prepareViewAllResponse((UamUser) user)).collect(Collectors.toList());
+        return responseList;
+    }
+    public Response viewUser(Long userId) {
+        Optional<UamUser> uamUser = uamUserRepository.findById(userId);
         uamUser.orElseThrow(() -> new NoRequestFoundException("no Request raised for User"));
         return userMapper.prepareViewUserResponse(uamUser.get());
 
     }
 
-    public Response editUser(Request request, Long requestId) {
-        Optional<UamUser> findUser = uamUserRepository.findById(requestId);
-        findUser.orElseThrow(() -> new NoRequestFoundException("no request found"));
-        UamUser uamUser=userMapper.populateEditUser(request,findUser.get());
-        uamUser.setOfId(requestId);
-        UamUser saveUamUser=uamUserRepository.save(uamUser);
-       return userMapper.prepareResponseEditUser(saveUamUser);
-    }
-
-
-
-    public Response rejectEditUser(Long requestId) {
-        Optional<UamUser> adminOptional = uamUserRepository.findById(requestId);
-        adminOptional.orElseThrow(() -> new NoRequestFoundException("no request found"));
-        UamUser admin = adminOptional.get();
-
-        admin.setStatus(Constant.INACTIVE);
-        admin.setPendingFor(Constant.DASH);
-        uamUserRepository.save(admin);
-        Response response = new Response();
-        response.setName(admin.getName());
-        response.setEmailId(admin.getEmailId());
-        response.setPfNumber(admin.getPfNumber());
-        response.setStatus(admin.getStatus());
-        response.setPendingFor(admin.getPendingFor());
-        response.setEffectiveDate(admin.getEffectiveDate());
-        response.setUserId(admin.getUserId());
-        response.setReason(admin.getReason());
-        response.setRejectReason(Constant.REJECT);
-        return response;
-
-    }
-
-    public Response approveEditUser(Long requestId) {
-        Optional<UamUser> adminOptional = uamUserRepository.findById(requestId);
-        adminOptional.orElseThrow(() -> new NoRequestFoundException("no request found"));
-        UamUser admin = adminOptional.get();
-        if (admin.getStatus().equals(Constant.ACTIVE) && admin.getPendingFor().equals(Constant.PENDING_APPROVAL_EDIT))
-            ;
-        {
-            admin.setStatus(Constant.DASH);
-        }
-        admin.setStatus(Constant.ACTIVE);
-        admin.setPendingFor(Constant.DASH);
-        uamUserRepository.save(admin);
-        Response response = new Response();
-        response.setName(admin.getName());
-        response.setEmailId(admin.getEmailId());
-        response.setPfNumber(admin.getPfNumber());
-        response.setStatus(admin.getStatus());
-        response.setPendingFor(admin.getPendingFor());
-        response.setEffectiveDate(admin.getEffectiveDate());
-        response.setUserId(admin.getUserId());
-        response.setReason(admin.getReason());
-        return response;
-    }
-
-    public Response deactivateUser(Request request, Long requestId) {
-        Optional<UamUser> adminOptional = uamUserRepository.findById(requestId);
+    public Response deactivateUser(Request request, Long userId) {
+        Optional<UamUser> adminOptional = uamUserRepository.findById(userId);
         adminOptional.orElseThrow(() -> new NoRequestFoundException("no request found"));
         UamUser admin = adminOptional.get();
         LocalDate currentDate = LocalDate.now();

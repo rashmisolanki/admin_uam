@@ -40,7 +40,7 @@ public class UamUser {
     @Column
     private int isDeleted;
     @Column
-    private Long ofId;
+    private long ofId;
 
     @OneToOne(mappedBy = "uamUser",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     private StagingUam stagingUam;

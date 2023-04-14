@@ -20,50 +20,50 @@ public class UamUserController {
         return uamUserService.createNewUser(request);
     }
 
-    @GetMapping("/approve/{requestId}")
-    public Response approvalRequest(@PathVariable Long requestId )
+    @GetMapping("/approve/{userId}")
+    public Response approvalRequest(@PathVariable Long userId )
         {
-           return uamUserService.approvalRequest(requestId);
+           return uamUserService.approvalRequest(userId);
         }
 
     @GetMapping("/view/allUser")
     public List<Response> viewAllUser()
     {
-       return uamUserService.viewAllUser();
+        return uamUserService.viewAllUser();
     }
 
-    @GetMapping("/view/user/{requestId}")
-    public Response viewUser(@PathVariable Long requestId)
+    @GetMapping("/view/user/{userId}")
+    public Response viewUser(@PathVariable Long userId)
     {
-       return uamUserService.viewUser(requestId);
+       return uamUserService.viewUser(userId);
     }
 
-    @GetMapping("/reject/{requestId}")
-    public Response rejectUser(@PathVariable Long requestId)
+    @GetMapping("/reject/{userId}")
+    public Response rejectUser(@PathVariable Long userId)
     {
-      return uamUserService.rejectAddUser(requestId);
+      return uamUserService.rejectAddUser(userId);
     }
 
-    @PutMapping("/edit/user/{requestId}")
-        public Response editUser(@RequestBody Request request ,@PathVariable Long requestId)
+    @PutMapping("/edit/user/{userId}")
+        public Response editUser(@RequestBody Request request ,@PathVariable Long userId)
         {
-           return uamUserService.editUser(request,requestId);
+           return uamUserService.editUser(request,userId);
         }
 
-     @GetMapping("/edit/approve/{requestId}")
-    public Response approveEditUser(@PathVariable Long requestId)
+     @GetMapping("/edit/approve/{userId}")
+    public Response approveEditUser(@PathVariable Long userId)
      {
-         return uamUserService.approveEditUser(requestId);
+         return uamUserService.approveEditUser(userId);
      }
-     @GetMapping("/edit/reject/{requestId}")
-      public Response rejectEditUser(@PathVariable Long requestId)
+     @GetMapping("/edit/reject/{userId}")
+      public Response rejectEditUser(@PathVariable Long userId)
      {
-         return uamUserService.rejectEditUser(requestId);
+         return uamUserService.rejectEditUser(userId);
      }
 
-     @GetMapping("/deactivate/{requestId}")
-     public Response deactivateUser(@RequestBody Request request,@PathVariable Long requestId)
+     @GetMapping("/deactivate/{userId}")
+     public Response deactivateUser(@RequestBody Request request,@PathVariable Long userId)
      {
-          return uamUserService.deactivateUser(request,requestId);
+          return uamUserService.deactivateUser(request,userId);
      }
 }
