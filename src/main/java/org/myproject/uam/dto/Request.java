@@ -16,10 +16,12 @@ public class Request {
     private LocalDate modifiedDate;
     private String name;
     private String emailId;
-    private String userGroup;
+    private String groupId;
     private LocalDate effectiveDate;
     private String reason;
     private String actionOnApproval;
     private String status;
+    private String pendingFor;
+    private Long userId;
 
 }

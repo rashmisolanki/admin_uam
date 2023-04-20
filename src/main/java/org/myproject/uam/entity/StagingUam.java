@@ -1,10 +1,13 @@
 package org.myproject.uam.entity;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
 
 import javax.persistence.*;
-@Data
-
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name="stagingUam")
 public class StagingUam {
@@ -24,6 +27,7 @@ public class StagingUam {
     private long toId;
     @Column
     private String groupId;
+    @JsonIgnoreProperties("stagingUam")
     @OneToOne
     @JoinColumn(name="fromId", referencedColumnName = "userId")
     private UamUser uamUser;

@@ -16,5 +16,5 @@ public interface UamUserRepository extends JpaRepository<UamUser, Long> {
      public Optional<UamUser> findByPfNumber(@Param("pfNumber") String pfNumber);
 
      @Query("select uu,ug from UamUser uu, UamUserGroupId ug where uu.isDeleted=0 and uu.pfNumber=ug.pfNumber")
-     public List<UamUser> findAllUserByIsDeleted();
+     public List<Object[]> findAllUserByIsDeleted();
 }

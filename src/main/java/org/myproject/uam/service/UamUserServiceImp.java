@@ -16,7 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -97,10 +99,10 @@ public class UamUserServiceImp implements UamUserService {
     }
 
     public List<Response> viewAllUser() {
-        List<UamUser> uamUserList=uamUserRepository.findAllUserByIsDeleted();
-        List<Response> responseList = uamUserList.stream()
-                .map(user -> userMapper.prepareViewAllResponse((UamUser) user)).collect(Collectors.toList());
-        return responseList;
+        List<Object[]> result=new ArrayList<>();
+        result=uamUserRepository.findAllUserByIsDeleted();
+        List<Response> uamResponseList=userMapper.resultOfObject(result);
+        return uamResponseList;
     }
     public Response viewUser(Long userId) {
         Optional<UamUser> uamUser = uamUserRepository.findById(userId);
