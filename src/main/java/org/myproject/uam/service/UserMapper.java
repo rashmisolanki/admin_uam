@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -38,7 +40,7 @@ public class UserMapper {
         stagingUam.setActionOnApproval(Constant.ADD);
         stagingUam.setStatus(Constant.NEW);
         stagingUam.setIsDeleted(0);
-        stagingUam.setGroupId(Constant.userGroupAbbreviation.get(request.getUserGroup()));
+        stagingUam.setGroupId(Constant.userGroupAbbreviation.get(request.getGroupId()));
         stagingUam.setUamUser(uamUser);
         uamUser.setStagingUam(stagingUam);
         return uamUser;
@@ -53,6 +55,7 @@ public class UserMapper {
         response.setEmailId(saveUamUser.getEmailId());
         response.setEffectiveDate(saveUamUser.getEffectiveDate());
         response.setReason(saveUamUser.getReason());
+        response.setGroupID(saveUamUser.getStagingUam().getGroupId());
         response.setPendingFor(saveUamUser.getStatus());
         response.setStatus(saveUamUser.getStatus());
         response.setCreatedBy(saveUamUser.getCreatedBy());
@@ -102,25 +105,35 @@ public class UserMapper {
         response.setReason(uamUser.getReason());
         return response;
     }
-
-    public Response prepareViewAllResponse(UamUser uamUser) {
-        Response response = new Response();
-        response.setUserId(uamUser.getUserId());
-        response.setName(uamUser.getName());
-        response.setEmailId(uamUser.getEmailId());
-        response.setPfNumber(uamUser.getPfNumber());
-        response.setStatus(uamUser.getStatus());
-        response.setPendingFor(uamUser.getPendingFor());
-        response.setEffectiveDate(uamUser.getEffectiveDate());
-        response.setReason(uamUser.getReason());
-        response.setCreationDate(uamUser.getCreationDate());
-        response.setModifiedDate(uamUser.getModifiedDate());
-        response.setCreatedBy(uamUser.getCreatedBy());
-        response.setModifiedBy(uamUser.getModifiedBy());
-        response.setGroupID(uamUser.getStagingUam().getGroupId());
-        return response;
+    public List<Response> resultOfObject(List<Object[]> result)
+    {
+        List<Response> responseDtoList = new ArrayList<Response>();
+        for(Object[] userAndGroup:result)
+        {
+            Response response=new Response();
+            if(userAndGroup[0]!=null)
+            {
+                UamUser uamUser=(UamUser) userAndGroup[0];
+                response.setUserId(uamUser.getUserId());
+                response.setPfNumber(uamUser.getPfNumber());
+                response.setModifiedBy(uamUser.getModifiedBy());
+                response.setModifiedDate(uamUser.getModifiedDate());
+                response.setCreatedBy(uamUser.getCreatedBy());
+            }
+                if(userAndGroup[1]!=null)
+                {
+                    //casting
+                    UamUserGroupId uamUserGroupId=(UamUserGroupId) userAndGroup[1];
+                    if(uamUserGroupId!=null)
+                    {
+                      String groupId=  uamUserGroupId.getGroupId();
+                        response.setGroupID(uamUserGroupId.getGroupId());
+                    }
+                }
+            responseDtoList.add(response);
+        }
+         return responseDtoList;
     }
-
     public Response prepareViewUserResponse(UamUser uamUser) {
         Response response = new Response();
         response.setUserId(response.getUserId());
@@ -172,7 +185,7 @@ public class UserMapper {
         if (request.getEffectiveDate().isBefore(LocalDate.now())) {
             throw new EffectiveStartDateException("effective start date is not before today's date");
         }
-       String abbreviatedGroup= Constant.userGroupAbbreviation.get(request.getUserGroup());
+       String abbreviatedGroup= Constant.userGroupAbbreviation.get(request.getGroupId());
         if (dbUamUser.getStatus().equals("active") && abbreviatedGroup.equals(dbUamUserGroupId.getGroupId())) {
             throw new NoRequestFoundException("There is no change to User Group Id.");
         }

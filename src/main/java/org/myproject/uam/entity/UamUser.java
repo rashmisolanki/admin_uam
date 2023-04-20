@@ -1,11 +1,14 @@
 package org.myproject.uam.entity;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-@Data
-
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name="uamUser")
 
@@ -41,7 +44,7 @@ public class UamUser {
     private int isDeleted;
     @Column
     private long ofId;
-
+    @JsonIgnoreProperties("uamUser")
     @OneToOne(mappedBy = "uamUser",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     private StagingUam stagingUam;
 
